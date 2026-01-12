@@ -44,9 +44,14 @@ export function AuthProvider({ children }) {
     try {
       const response = await authService.login(credentials);
       // Backend returns: { success, data: { token, user } }
-      setUser(response.data.user);
-      setIsAuthenticated(true);
-      toast.success(`Welcome back, ${response.data.user.name}! 🙏`);
+      const loggedInUser = response?.data?.user ?? response?.data?.data?.user;
+      if (loggedInUser) {
+        setUser(loggedInUser);
+        setIsAuthenticated(true);
+        toast.success(`Welcome back, ${loggedInUser.name}! 🙏`);
+      } else {
+        throw new Error('Invalid login response: missing user data');
+      }
       return response;
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
@@ -59,9 +64,14 @@ export function AuthProvider({ children }) {
     try {
       const response = await authService.register(userData);
       // Backend returns: { success, data: { token, user } }
-      setUser(response.data.user);
-      setIsAuthenticated(true);
-      toast.success(`Welcome to BrajPath, ${response.data.user.name}! 🎉`);
+      const newUser = response?.data?.user ?? response?.data?.data?.user;
+      if (newUser) {
+        setUser(newUser);
+        setIsAuthenticated(true);
+        toast.success(`Welcome to BrajPath, ${newUser.name}! 🎉`);
+      } else {
+        throw new Error('Invalid registration response: missing user data');
+      }
       return response;
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
